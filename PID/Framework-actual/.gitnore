@@ -1,0 +1,91 @@
+## Visual Studio / .NET specific
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild/
+[Bb]uild[Ll]og.*
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Visual Studio working files
+*.sln.ide
+*.vspscc
+*.vssscc
+.vs/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+.nuget/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.dll
+*.exe
+*.dbmdl
+*.bak
+*.log
+
+# Publish outputs
+publish/
+*.publish.xml
+*.azurePubxml
+*.pubxml
+*.pubxml.user
+*.tmp
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# Entity Framework
+Migrations/
+*.db
+
+# Cache
+*.cache
+*.pdb
+*.obj
+*.pch
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Others
+_ReSharper*/
+*.resharper
+*.DotSettings.user
+*.orig
+
+# Secrets
+appsettings.Development.json
+appsettings.Local.json
+.env
