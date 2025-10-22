@@ -1,0 +1,65 @@
+# Fișiere Visual Studio
+.vs/
+*.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build & bin
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]emp/
+[Tt]mp/
+
+# Cache & database
+*.db
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Fișiere generate automat
+*.pdb
+*.cache
+*.ilk
+*.ncb
+*.sdf
+*.opensdf
+*.tlog
+
+# Fișiere de test / rezultate
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publicații / pachete
+*.publish.xml
+publish/
+*.nupkg
+
+# Config locale
+appsettings.Development.json
+secrets.json
+
+# Backup / arhive
+*.bak
+*.old
+*.orig
+*.tmp
+*.zip
+*.rar
+
+# Fișiere tool-uri
+_ReSharper*/
+*.DotSettings.user
+*.idea/
+*.DS_Store
+Thumbs.db
+
+# Ignoră foldere specifice proiectului tău
+PID/PID/Framework-actual/.vs/
+PID/PID/Framework-actual/bin/
+PID/PID/Framework-actual/obj/
