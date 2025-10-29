@@ -22,5 +22,16 @@ namespace Algorithms.Utilities
             return histogram;
         }
         #endregion
+
+        #region Clip
+        public static byte Clip(double value)
+        {
+            if (value < 0) return 0;
+            if (value > 255) return 255;
+
+            value += 0.5; // rounding
+            return (byte)value;
+        }
+        #endregion
     }
 }

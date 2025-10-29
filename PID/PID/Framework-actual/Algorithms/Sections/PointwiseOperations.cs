@@ -3,20 +3,13 @@ using Emgu.CV.Structure;
 using System;
 using System.Diagnostics.Contracts;
 using System.Windows.Forms;
+using Algorithms.Utilities;
+
 
 namespace Algorithms.Sections
 {
     public class PointwiseOperations
     {
-        private static byte Clip(double value)
-        {
-            if (value < 0) return 0;
-            if (value > 255) return 255;
-
-            value += 0.5; // rounding
-            return (byte)value;
-        }
-
         public static Image<Gray, byte> ApplyLUT(Image<Gray, byte> inputImage, byte[] LUT)
         {
             Image<Gray, byte> result = new Image<Gray, byte>(inputImage.Size);
@@ -39,7 +32,7 @@ namespace Algorithms.Sections
             {
                 double result = a * r + b;
 
-                LUT[r] = Clip(result);
+                LUT[r] = Utils.Clip(result);
             }
 
             return LUT;
@@ -53,7 +46,7 @@ namespace Algorithms.Sections
             var c = 255.0 / Math.Pow(255.0, gamma);
 
             for (var i = 0; i < 256; ++i)
-                LUT[i] = Clip(c * Math.Pow(i, gamma));
+                LUT[i] = Utils.Clip(c * Math.Pow(i, gamma));
 
             return LUT;
         }

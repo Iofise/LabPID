@@ -834,6 +834,50 @@ namespace Framework.ViewModel
         #endregion
 
         #region Filters
+        private ICommand _filter1command;
+        public ICommand Filter1Command
+        {
+            get
+            {
+                if (_filter1command == null)
+                    _filter1command = new RelayCommand(UseFilter1);
+                return _filter1command;
+            }
+        }
+
+        private void UseFilter1(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please load an image first!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter as Canvas);
+
+            //double[,] filter = new double[,]
+            //{
+            //    {0.1, 0.1, 0.1 },
+            //    {0.1, 0.2, 0.1 },
+            //    {0.1, 0.1, 0.1 }
+            //};
+            double[,] filter = new double[,]
+            {
+        {0.0, -1.0, 0.0 },
+        {-1.0, 5.0, -1.0 },
+        {0.0, -1.0, 0.0 }
+            };
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = Filters.ApplyFilter(GrayInitialImage, filter);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+
+
+
+        }
+
         #endregion
 
         #region Morphological operations
