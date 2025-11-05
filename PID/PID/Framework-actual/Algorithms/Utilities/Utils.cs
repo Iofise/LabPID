@@ -29,9 +29,26 @@ namespace Algorithms.Utilities
             if (value < 0) return 0;
             if (value > 255) return 255;
 
-            value += 0.5; // rounding
+            value += 0.5;
             return (byte)value;
         }
         #endregion
+
+        #region Clamp
+        public static int Clamp(int val, int min, int max)
+        {
+            if (val < min)
+            {
+                return min;
+            }
+            if (val > max)
+            {
+                return max;
+            }
+            return val;
+        }
+        #endregion
+
+        
     }
 }

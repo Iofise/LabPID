@@ -889,6 +889,55 @@ namespace Framework.ViewModel
         #region Segmentation
         #endregion
 
+        #region Gauss Separated Filter
+        private ICommand _gaussSeparatedFilterCommand;
+        public ICommand GaussSeparatedFilterCommand
+        {
+            get
+            {
+                if (_gaussSeparatedFilterCommand == null)
+                    _gaussSeparatedFilterCommand = new RelayCommand(GaussSeparatedFilter);
+                return _gaussSeparatedFilterCommand;
+            }
+        }
+
+        private void GaussSeparatedFilter(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please load an image first!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter as Canvas);
+
+            List<string> labels = new List<string>() { "Sigma X (σx): ", "Sigma Y (σy): " };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+
+            List<double> values = window.GetValues();
+
+            if (values.Count < 2 || values[0] <= 0 || values[1] <= 0)
+            {
+                MessageBox.Show("Please enter positive values for Sigma X and Sigma Y.");
+                return;
+            }
+            double sigmaX = values[0];
+            double sigmaY = values[1];
+
+            if (GrayInitialImage != null)
+            {
+                GrayProcessedImage = Filters.GaussFilteringSeparated(GrayInitialImage, sigmaX, sigmaY);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            else if (ColorInitialImage != null)
+            {
+                ColorProcessedImage = Filters.GaussColorFilteringSeparated(ColorInitialImage, sigmaX, sigmaY);
+                ProcessedImage = Convert(ColorProcessedImage);
+            }
+        }
+        #endregion
+
         #region Use processed image as initial image
         private ICommand _useProcessedImageAsInitialImageCommand;
         public ICommand UseProcessedImageAsInitialImageCommand
