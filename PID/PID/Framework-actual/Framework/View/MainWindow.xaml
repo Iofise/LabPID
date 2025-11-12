@@ -234,7 +234,10 @@
                 </MenuItem>
                 <MenuItem Header="High-pass"
                           Foreground="#1E1E1E">
-
+                    <MenuItem Header="Sobel Diagonal (45°)"
+                              Foreground="#1E1E1E"
+                              Command="{Binding Path=MenuCommands.SobelDiagonalCommand}"
+                              CommandParameter="{Binding ElementName=processedImageCanvas}"/>
                 </MenuItem>
             </MenuItem>
 

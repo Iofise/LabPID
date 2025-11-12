@@ -855,17 +855,11 @@ namespace Framework.ViewModel
 
             ClearProcessedCanvas(parameter as Canvas);
 
-            //double[,] filter = new double[,]
-            //{
-            //    {0.1, 0.1, 0.1 },
-            //    {0.1, 0.2, 0.1 },
-            //    {0.1, 0.1, 0.1 }
-            //};
             double[,] filter = new double[,]
             {
-        {0.0, -1.0, 0.0 },
-        {-1.0, 5.0, -1.0 },
-        {0.0, -1.0, 0.0 }
+                {0.0, -1.0, 0.0 },
+                {-1.0, 5.0, -1.0 },
+                {0.0, -1.0, 0.0 }
             };
 
             if (GrayInitialImage != null)
@@ -874,11 +868,60 @@ namespace Framework.ViewModel
                 ProcessedImage = Convert(GrayProcessedImage);
             }
 
-
-
         }
 
         #endregion
+
+        #region Sobel Diagonal Filter
+        private ICommand _sobelDiagonalCommand;
+        public ICommand SobelDiagonalCommand
+        {
+            get
+            {
+                if (_sobelDiagonalCommand == null)
+                    _sobelDiagonalCommand = new RelayCommand(SobelDiagonalFilter);
+                return _sobelDiagonalCommand;
+            }
+        }
+
+        private void SobelDiagonalFilter(object parameter)
+        {
+            if (InitialImage == null)
+            {
+                MessageBox.Show("Please load an image first!");
+                return;
+            }
+
+            if (GrayInitialImage == null && ColorInitialImage != null)
+            {
+                GrayInitialImage = Tools.Convert(ColorInitialImage);
+            }
+            else if (GrayInitialImage == null && ColorInitialImage == null)
+            {
+                MessageBox.Show("Please load a grayscale image first!");
+                return;
+            }
+
+            ClearProcessedCanvas(parameter as Canvas);
+
+            List<string> labels = new List<string>() { "Threshold (T): ", "Deviation (dev - grade): " };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+
+            List<double> values = window.GetValues();
+
+            if (values.Count < 2)
+            {
+                MessageBox.Show("Please enter values for Threshold and Deviation.");
+                return;
+            }
+            int T = (int)values[0];
+            double deviation = values[1];
+
+            GrayProcessedImage = Filters.SobelDiagonal(GrayInitialImage, T, deviation);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+        #endregion
 
         #region Morphological operations
         #endregion

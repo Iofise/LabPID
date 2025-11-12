@@ -102,5 +102,114 @@ namespace Algorithms.Sections
 
             return resultImage;
         }
+
+        public static Image<Gray, byte> SobelDiagonal(Image<Gray, byte> inputImage, double T, double deviation)
+        {
+            double[,] Sx = new double[,]
+            {
+                { -1.0, 0.0, 1.0 },
+                { -2.0, 0.0, 2.0 },
+                { -1.0, 0.0, 1.0 }
+            };
+
+            double[,] Sy = new double[,]
+            {
+                { -1.0, -2.0, -1.0 },
+                { 0.0, 0.0, 0.0 },
+                { 1.0, 2.0, 1.0 }
+            };
+
+            Image<Gray, byte> resultImage = new Image<Gray, byte>(inputImage.Size);
+
+            int w = inputImage.Width;
+            int h = inputImage.Height;
+
+            double devRad = deviation * Math.PI / 180.0;
+
+            double angle45 = 45.0 * Math.PI / 180.0;
+            ///double angle135 = 135.0 * Math.PI / 180.0;
+            ///double angleMinus45 = -45.0 * Math.PI / 180.0;
+            ///double angleMinus135 = -135.0 * Math.PI / 180.0;
+
+            Image<Gray, float> fxImage = new Image<Gray, float>(w, h);
+            Image<Gray, float> fyImage = new Image<Gray, float>(w, h);
+
+            int half_size = 1;
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    double fx = 0.0;
+                    double fy = 0.0;
+
+                    for (int i = -half_size; i <= half_size; i++)
+                    {
+                        for (int j = -half_size; j <= half_size; j++)
+                        {
+                            int y_clamped = Utils.Clamp(y + i, 0, h - 1);
+                            int x_clamped = Utils.Clamp(x + j, 0, w - 1);
+
+                            double p = inputImage.Data[y_clamped, x_clamped, 0];
+
+                            fx += p * Sx[i + half_size, j + half_size];
+                            fy += p * Sy[i + half_size, j + half_size];
+                        }
+                    }
+
+                    fxImage.Data[y, x, 0] = (float)fx;
+                    fyImage.Data[y, x, 0] = (float)fy;
+                }
+            }
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    double fx = fxImage.Data[y, x, 0];
+                    double fy = fyImage.Data[y, x, 0];
+
+                    double n_grad = Math.Sqrt(fx * fx + fy * fy);
+
+                    if (n_grad > T)
+                    {
+                        double theta = Math.Atan2(fy, fx);
+
+                        bool is45 = false;
+
+                        /*
+                        if (Math.Abs(theta - angle45) < devRad ||
+                            Math.Abs(theta - angle135) < devRad ||
+                            Math.Abs(theta - angleMinus135) < devRad ||
+                            Math.Abs(theta - angleMinus45) < devRad)
+                        {
+                            is45 = true;
+                        }
+                        */
+
+                        if (Math.Abs(theta - angle45) < devRad)
+                        {
+                            is45 = true;
+                        }
+
+                        if (is45)
+                        {
+                            resultImage.Data[y, x, 0] = 255;
+                        }
+                        else
+                        {
+                            resultImage.Data[y, x, 0] = 0;
+                        }
+                    }
+                    else
+                    {
+                        resultImage.Data[y, x, 0] = 0;
+                    }
+                }
+            }
+
+            return resultImage;
+        }
+
     }
 }
