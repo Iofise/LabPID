@@ -1,23 +1,21 @@
-﻿using Emgu.CV;
+﻿using Algorithms.Sections;
+using Algorithms.Tools;
+using Algorithms.Utilities;
+using Emgu.CV;
 using Emgu.CV.Structure;
-
-using System.Windows;
+using Framework.View;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Imaging;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Controls;
-using System.Collections.Generic;
-
-using Framework.View;
+using static Framework.Converters.ImageConverter;
 using static Framework.Utilities.DataProvider;
 using static Framework.Utilities.DrawingHelper;
 using static Framework.Utilities.FileHelper;
-using static Framework.Converters.ImageConverter;
-
-using Algorithms.Sections;
-using Algorithms.Tools;
-using Algorithms.Utilities;
 
 namespace Framework.ViewModel
 {
@@ -923,8 +921,113 @@ namespace Framework.ViewModel
         }
         #endregion
 
-        #region Morphological operations
-        #endregion
+        #region Morphological Operations
+        private List<double> ShowMorphologyDialog()
+        {
+            List<string> labels = new List<string>()
+            {
+                "Inaltime Element Structurant (h): ",
+                "Latime Element Structurant (w): ",
+                "Prag Binarizare (T): ",
+                "Optiune (1=Obiecte Albe, 0=Obiecte Negre): "
+            };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            return window.GetValues();
+        }
+
+        private ICommand _dilationCommand;
+        public ICommand DilationCommand
+        {
+            get { if (_dilationCommand == null) _dilationCommand = new RelayCommand(DilationFilter); return _dilationCommand; }
+        }
+
+        private void DilationFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowMorphologyDialog();
+            if (values == null || values.Count < 4) return;
+
+            int h = (int)values[0];
+            int w = (int)values[1];
+            int T = (int)values[2];
+            int optiune = (int)values[3];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = Morphology.Dilation(GrayInitialImage, h, w, T, optiune);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+
+        private ICommand _erosionCommand;
+        public ICommand ErosionCommand
+        {
+            get { if (_erosionCommand == null) _erosionCommand = new RelayCommand(ErosionFilter); return _erosionCommand; }
+        }
+
+        private void ErosionFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowMorphologyDialog();
+            if (values == null || values.Count < 4) return;
+
+            int h = (int)values[0];
+            int w = (int)values[1];
+            int T = (int)values[2];
+            int optiune = (int)values[3];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = Morphology.Erosion(GrayInitialImage, h, w, T, optiune);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+
+        private ICommand _openingCommand;
+        public ICommand OpeningCommand
+        {
+            get { if (_openingCommand == null) _openingCommand = new RelayCommand(OpeningFilter); return _openingCommand; }
+        }
+
+        private void OpeningFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowMorphologyDialog();
+            if (values == null || values.Count < 4) return;
+
+            int h = (int)values[0];
+            int w = (int)values[1];
+            int T = (int)values[2];
+            int optiune = (int)values[3];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = Morphology.Opening(GrayInitialImage, h, w, T, optiune);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+
+        private ICommand _closingCommand;
+        public ICommand ClosingCommand
+        {
+            get { if (_closingCommand == null) _closingCommand = new RelayCommand(ClosingFilter); return _closingCommand; }
+        }
+
+        private void ClosingFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowMorphologyDialog();
+            if (values == null || values.Count < 4) return;
+
+            int h = (int)values[0];
+            int w = (int)values[1];
+            int T = (int)values[2];
+            int optiune = (int)values[3];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = Morphology.Closing(GrayInitialImage, h, w, T, optiune);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+#endregion
 
         #region Geometric transformations
         #endregion
@@ -933,7 +1036,7 @@ namespace Framework.ViewModel
         #endregion
 
         #region Gauss Separated Filter
-        private ICommand _gaussSeparatedFilterCommand;
+        private ICommand _gaussSeparatedFilterCommand;
         public ICommand GaussSeparatedFilterCommand
         {
             get

@@ -5,6 +5,99 @@ using System;
 
 namespace Algorithms.Sections
 {
+
+    public static class Morphology
+    {
+        private static Image<Gray, byte> ApplyMorphology(Image<Gray, byte> binaryImage, int h, int w, int optiune, bool isDilation)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(binaryImage.Size);
+
+            int height = binaryImage.Height;
+            int width = binaryImage.Width;
+            int h_half = h / 2;
+            int w_half = w / 2;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    bool conditionMet = !isDilation;
+
+                    for (int i = -h_half; i <= h_half; i++)
+                    {
+                        for (int j = -w_half; j <= w_half; j++)
+                        {
+                            int y_clamped = Utils.Clamp(y + i, 0, height - 1);
+                            int x_clamped = Utils.Clamp(x + j, 0, width - 1);
+
+                            byte neighborValue = binaryImage.Data[y_clamped, x_clamped, 0];
+
+                            if (isDilation)
+                            {
+                                byte targetValue = (optiune == 1) ? (byte)255 : (byte)0;
+
+                                if (neighborValue == targetValue)
+                                {
+                                    conditionMet = true;
+                                    goto SetPixel;
+                                }
+                            }
+                            else
+                            {
+                                byte oppositeValue = (optiune == 1) ? (byte)0 : (byte)255;
+
+                                if (neighborValue == oppositeValue)
+                                {
+                                    conditionMet = true;
+                                    goto SetPixel;
+                                }
+                            }
+                        }
+                    }
+
+                SetPixel:
+                    if (isDilation)
+                    {
+                        byte finalColor = (optiune == 1) ? (byte)255 : (byte)0;
+                        result.Data[y, x, 0] = conditionMet ? finalColor : (byte)(255 - finalColor);
+                    }
+                    else
+                    {
+                        byte finalColor = (optiune == 1) ? (byte)0 : (byte)255;
+                        result.Data[y, x, 0] = conditionMet ? finalColor : (byte)(255 - finalColor);
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static Image<Gray, byte> Dilation(Image<Gray, byte> inputImage, int h, int w, int T, int optiune)
+        {
+            Image<Gray, byte> binaryImage = Thresholding.Binary(inputImage, T);
+            return ApplyMorphology(binaryImage, h, w, optiune, isDilation: true);
+        }
+
+        public static Image<Gray, byte> Erosion(Image<Gray, byte> inputImage, int h, int w, int T, int optiune)
+        {
+            Image<Gray, byte> binaryImage = Thresholding.Binary(inputImage, T);
+            return ApplyMorphology(binaryImage, h, w, optiune, isDilation: false);
+        }
+
+        public static Image<Gray, byte> Opening(Image<Gray, byte> inputImage, int h, int w, int T, int optiune)
+        {
+            Image<Gray, byte> erodedImage = Erosion(inputImage, h, w, T, optiune);
+
+            return ApplyMorphology(erodedImage, h, w, optiune, isDilation: true);
+        }
+
+        public static Image<Gray, byte> Closing(Image<Gray, byte> inputImage, int h, int w, int T, int optiune)
+        {
+            Image<Gray, byte> dilatedImage = Dilation(inputImage, h, w, T, optiune);
+
+            return ApplyMorphology(dilatedImage, h, w, optiune, isDilation: false);
+        }
+    }
+
     public class Filters
     {
 

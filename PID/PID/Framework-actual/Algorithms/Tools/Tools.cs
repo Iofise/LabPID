@@ -74,7 +74,6 @@ namespace Algorithms.Tools
                     }
                 }
             }
-
             return result;
         }
         #endregion
