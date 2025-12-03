@@ -936,7 +936,22 @@ namespace Framework.ViewModel
             return window.GetValues();
         }
 
-        private ICommand _dilationCommand;
+        private List<double> ShowGradientDialog()
+        {
+            List<string> labels = new List<string>()
+            {
+                "Inaltime Element Structurant (h): ",
+                "Latime Element Structurant (w): ",
+                "Optiune (1=Obiecte Albe, 0=Obiecte Negre): ",
+                "Dimensiunea mastii pentru Dilatare: ",
+                "Dimensiunea mastii pentru Erodare: "
+            };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            return window.GetValues();
+        }
+
+        private ICommand _dilationCommand;
         public ICommand DilationCommand
         {
             get { if (_dilationCommand == null) _dilationCommand = new RelayCommand(DilationFilter); return _dilationCommand; }
@@ -1027,7 +1042,32 @@ namespace Framework.ViewModel
             GrayProcessedImage = Morphology.Closing(GrayInitialImage, h, w, T, optiune);
             ProcessedImage = Convert(GrayProcessedImage);
         }
-#endregion
+
+        private ICommand _morphologicalGradientCommand;
+
+        public ICommand MorphologicalGradientCommand
+        {
+            get { if (_morphologicalGradientCommand == null) _morphologicalGradientCommand = new RelayCommand(MorphologicalGradient); return _morphologicalGradientCommand; }
+        }
+
+        private void MorphologicalGradient(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowGradientDialog();
+            if (values == null || values.Count < 5) return;
+
+            int h = (int)values[0];
+            int w = (int)values[1];
+            int optiune = (int)values[2];
+            int dilatation = (int)values[3];
+            int erosion = (int)values[4];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = Morphology.MorphologicalGradient(GrayInitialImage, h, w, optiune, dilatation, erosion);
+            ProcessedImage = Convert(GrayProcessedImage);
+        }
+        #endregion
 
         #region Geometric transformations
         #endregion

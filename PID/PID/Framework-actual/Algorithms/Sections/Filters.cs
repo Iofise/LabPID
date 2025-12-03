@@ -71,6 +71,39 @@ namespace Algorithms.Sections
             return result;
         }
 
+        private static Image<Gray, byte> ApplyGradient(Image<Gray, byte> dilatedImage, Image<Gray, byte> erotedImage, int h, int w, int dilatation, int erosion)
+        {
+            Image<Gray, byte> result = new Image<Gray, byte>(dilatedImage.Size);
+
+            int height = dilatedImage.Height;
+            int width = dilatedImage.Width;
+            int h_half = h / 2;
+            int w_half = w / 2;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    for (int i = -h_half; i <= h_half; i++)
+                    {
+                        for (int j = -w_half; j <= w_half; j++)
+                        {
+                            int y_clamped = Utils.Clamp(y + i, 0, height - 1);
+                            int x_clamped = Utils.Clamp(x + j, 0, width - 1);
+
+                            byte neighborValueD = dilatedImage.Data[y_clamped, x_clamped, 0];
+                            byte neighborValueE = erotedImage.Data[y_clamped, x_clamped, 0];
+                        }
+                    }
+
+                SetPixel:
+                        byte finalColor = (dilatation == 1) ? (byte)255 : (byte)0;
+                        result.Data[y, x, 0] = (byte)(255 - finalColor);
+                }
+            }
+            return result;
+        }
+
         public static Image<Gray, byte> Dilation(Image<Gray, byte> inputImage, int h, int w, int T, int optiune)
         {
             Image<Gray, byte> binaryImage = Thresholding.Binary(inputImage, T);
@@ -95,6 +128,23 @@ namespace Algorithms.Sections
             Image<Gray, byte> dilatedImage = Dilation(inputImage, h, w, T, optiune);
 
             return ApplyMorphology(dilatedImage, h, w, optiune, isDilation: false);
+        }
+
+        public static Image<Gray, byte> MorphologicalGradient(Image<Gray, byte> inputImage, int h, int w, int T,int optiune, int dilatation, int erosion)
+        {
+            Image<Gray, byte> dilatedImage = Dilation(inputImage, h, w, T, optiune);
+            Image<Gray, byte> erodedImage = Erosion(inputImage, h, w, T, optiune);
+            return ApplyGradient(dilatedImage, erodedImage, h, w, erosion, dilatation);
+        }
+
+        public static Image<Gray, byte> MorphologicalGradient(int h, int w, int optiune, int dilatation, int erosion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Image<Gray, byte> MorphologicalGradient(Image<Gray, byte> grayInitialImage, int h, int w, int optiune, int dilatation, int erosion)
+        {
+            throw new NotImplementedException();
         }
     }
 
