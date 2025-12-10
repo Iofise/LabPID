@@ -245,6 +245,8 @@
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
                       Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
 
+                <MenuItem Header="--- Operatii Binare (Lab 7) ---" IsEnabled="False" Foreground="#777777"/>
+
                 <MenuItem Header="1. Dilation"
                           Foreground="#1E1E1E"
                           Command="{Binding Path=MenuCommands.DilationCommand}"
@@ -255,8 +257,6 @@
                           Command="{Binding Path=MenuCommands.ErosionCommand}"
                           CommandParameter="{Binding ElementName=processedImageCanvas}"/>
 
-                <Separator/>
-
                 <MenuItem Header="3. Opening (Erode then Dilate)"
                           Foreground="#1E1E1E"
                           Command="{Binding Path=MenuCommands.OpeningCommand}"
@@ -266,16 +266,31 @@
                           Foreground="#1E1E1E"
                           Command="{Binding Path=MenuCommands.ClosingCommand}"
                           CommandParameter="{Binding ElementName=processedImageCanvas}"/>
-                <MenuItem Header="5. MorphologicalGradient"
-                    Foreground="#1E1E1E"
-                    Command="{Binding Path=MenuCommands.MorphologicalGradientCommand}"
-                    CommandParameter="{Binding ElementName=processedImageCanvas}"/>
+
+                <Separator/>
+
+                <MenuItem Header="--- Operatii Grayscale (Lab 9) ---" IsEnabled="False" Foreground="#777777"/>
+
+                <MenuItem Header="5. Grayscale Morphological Gradient"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.MorphologicalGradientCommand}"
+                          CommandParameter="{Binding ElementName=processedImageCanvas}"/>
 
             </MenuItem>
 
-            <MenuItem Header="Geometric transformations"
+            <MenuItem Header="Geometric transforms"
                       Background="{Binding Path=Theme.MenuItemBackgroundColor}"
                       Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
+
+                <MenuItem Header="Scale - Bilinear Interpolation"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.ScaleBilinearCommand}"
+                          CommandParameter="{Binding ElementName=processedImageCanvas}"/>
+
+                <MenuItem Header="Scale - Bicubic Interpolation"
+                          Foreground="#1E1E1E"
+                          Command="{Binding Path=MenuCommands.ScaleBicubicCommand}"
+                          CommandParameter="{Binding ElementName=processedImageCanvas}"/>
 
             </MenuItem>
 

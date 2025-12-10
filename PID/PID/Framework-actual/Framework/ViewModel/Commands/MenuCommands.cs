@@ -4,6 +4,7 @@ using Algorithms.Utilities;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Framework.View;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -941,10 +942,7 @@ namespace Framework.ViewModel
             List<string> labels = new List<string>()
             {
                 "Inaltime Element Structurant (h): ",
-                "Latime Element Structurant (w): ",
-                "Optiune (1=Obiecte Albe, 0=Obiecte Negre): ",
-                "Dimensiunea mastii pentru Dilatare: ",
-                "Dimensiunea mastii pentru Erodare: "
+                "Latime Element Structurant (w): "
             };
             DialogWindow window = new DialogWindow(_mainVM, labels);
             window.ShowDialog();
@@ -1047,29 +1045,98 @@ namespace Framework.ViewModel
 
         public ICommand MorphologicalGradientCommand
         {
-            get { if (_morphologicalGradientCommand == null) _morphologicalGradientCommand = new RelayCommand(MorphologicalGradient); return _morphologicalGradientCommand; }
+            get { if (_morphologicalGradientCommand == null) _morphologicalGradientCommand = new RelayCommand(MorphologicalGradientFilter); return _morphologicalGradientCommand; }
         }
 
-        private void MorphologicalGradient(object parameter)
+        private void MorphologicalGradientFilter(object parameter)
         {
             if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
 
             List<double> values = ShowGradientDialog();
-            if (values == null || values.Count < 5) return;
+            if (values == null || values.Count < 2) return;
 
             int h = (int)values[0];
             int w = (int)values[1];
-            int optiune = (int)values[2];
-            int dilatation = (int)values[3];
-            int erosion = (int)values[4];
 
             ClearProcessedCanvas(parameter as Canvas);
-            GrayProcessedImage = Morphology.MorphologicalGradient(GrayInitialImage, h, w, optiune, dilatation, erosion);
+
+            GrayProcessedImage = Morphology.MorphologicalGradient(GrayInitialImage, h, w);
             ProcessedImage = Convert(GrayProcessedImage);
         }
         #endregion
 
-        #region Geometric transformations
+
+        #region Geometric transforms
+        private List<double> ShowScaleDialog()
+        {
+            List<string> labels = new List<string>() { "Factor Scalare X (sx): ", "Factor Scalare Y (sy): " };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            return window.GetValues();
+        }
+
+        private ICommand _scaleBilinearCommand;
+        public ICommand ScaleBilinearCommand
+        {
+            get { if (_scaleBilinearCommand == null) _scaleBilinearCommand = new RelayCommand(ScaleBilinearFilter); return _scaleBilinearCommand; }
+        }
+
+        private void ScaleBilinearFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowScaleDialog();
+            if (values.Count < 2 || values[0] <= 0 || values[1] <= 0)
+            {
+                MessageBox.Show("Please enter valid positive scaling factors (sx, sy).");
+                return;
+            }
+            double sx = values[0];
+            double sy = values[1];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            try
+            {
+                GrayProcessedImage = GeometricTransforms.Scale(GrayInitialImage, sx, sy, useBicubic: false);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Eroare la scalare: {ex.Message}", "Eroare", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private ICommand _scaleBicubicCommand;
+        public ICommand ScaleBicubicCommand
+        {
+            get { if (_scaleBicubicCommand == null) _scaleBicubicCommand = new RelayCommand(ScaleBicubicFilter); return _scaleBicubicCommand; }
+        }
+
+        private void ScaleBicubicFilter(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Please load a grayscale image first!"); return; }
+
+            List<double> values = ShowScaleDialog();
+            if (values.Count < 2 || values[0] <= 0 || values[1] <= 0)
+            {
+                MessageBox.Show("Please enter valid positive scaling factors (sx, sy).");
+                return;
+            }
+            double sx = values[0];
+            double sy = values[1];
+
+            ClearProcessedCanvas(parameter as Canvas);
+            try
+            {
+                GrayProcessedImage = GeometricTransforms.Scale(GrayInitialImage, sx, sy, useBicubic: true);
+                ProcessedImage = Convert(GrayProcessedImage);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Eroare la scalare: {ex.Message}", "Eroare", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         #endregion
 
         #region Segmentation
