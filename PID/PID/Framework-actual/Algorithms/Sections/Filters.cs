@@ -2,9 +2,135 @@
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace Algorithms.Sections
 {
+    public class Segmentation
+    {
+        public static List<System.Drawing.Point> HarrisCornerDetector(Image<Gray, byte> inputImage, double sigma, double alpha, double T)
+        {
+            int h = inputImage.Height;
+            int w = inputImage.Width;
+
+            Image<Gray, byte> blurred = Filters.GaussFilteringSeparated(inputImage, 1.0, 1.0);
+
+            float[,] fx = new float[h, w];
+            float[,] fy = new float[h, w];
+            double[,] Sx = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+            double[,] Sy = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    double vx = 0, vy = 0;
+                    for (int i = -1; i <= 1; i++)
+                    {
+                        for (int j = -1; j <= 1; j++)
+                        {
+                            int yc = Utils.Clamp(y + i, 0, h - 1);
+                            int xc = Utils.Clamp(x + j, 0, w - 1);
+                            byte p = blurred.Data[yc, xc, 0];
+                            vx += p * Sx[i + 1, j + 1];
+                            vy += p * Sy[i + 1, j + 1];
+                        }
+                    }
+                    fx[y, x] = (float)vx;
+                    fy[y, x] = (float)vy;
+                }
+            }
+
+            Image<Gray, float> fx2 = new Image<Gray, float>(w, h);
+            Image<Gray, float> fy2 = new Image<Gray, float>(w, h);
+            Image<Gray, float> fxy = new Image<Gray, float>(w, h);
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    fx2.Data[y, x, 0] = fx[y, x] * fx[y, x];
+                    fy2.Data[y, x, 0] = fy[y, x] * fy[y, x];
+                    fxy.Data[y, x, 0] = fx[y, x] * fy[y, x];
+                }
+            }
+
+            Image<Gray, float> Gx2 = ApplyGaussFloat(fx2, sigma);
+            Image<Gray, float> Gy2 = ApplyGaussFloat(fy2, sigma);
+            Image<Gray, float> Gxy = ApplyGaussFloat(fxy, sigma);
+
+            double[,] crf = new double[h, w];
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    double m11 = Gx2.Data[y, x, 0];
+                    double m22 = Gy2.Data[y, x, 0];
+                    double m12 = Gxy.Data[y, x, 0];
+
+                    double det = m11 * m22 - m12 * m12;
+                    double trace = m11 + m22;
+                    crf[y, x] = det - alpha * (trace * trace);
+                }
+            }
+
+            List<System.Drawing.Point> corners = new List<System.Drawing.Point>();
+            for (int y = 1; y < h - 1; y++)
+            {
+                for (int x = 1; x < w - 1; x++)
+                {
+                    if (crf[y, x] > T)
+                    {
+                        bool isMax = true;
+                        for (int i = -1; i <= 1; i++)
+                        {
+                            for (int j = -1; j <= 1; j++)
+                            {
+                                if (i == 0 && j == 0) continue;
+                                if (crf[y, x] < crf[y + i, x + j])
+                                {
+                                    isMax = false;
+                                    break;
+                                }
+                            }
+                            if (!isMax) break;
+                        }
+                        if (isMax) corners.Add(new System.Drawing.Point(x, y));
+                    }
+                }
+            }
+            return corners;
+        }
+
+        private static Image<Gray, float> ApplyGaussFloat(Image<Gray, float> img, double sigma)
+        {
+            double[,] mask = Filters.GaussMask1D(sigma);
+            int half = mask.GetLength(1) / 2;
+            Image<Gray, float> temp = new Image<Gray, float>(img.Width, img.Height);
+            Image<Gray, float> res = new Image<Gray, float>(img.Width, img.Height);
+
+            for (int y = 0; y < img.Height; y++)
+                for (int x = 0; x < img.Width; x++)
+                {
+                    float s = 0;
+                    for (int i = -half; i <= half; i++)
+                        s += (float)(img.Data[y, Utils.Clamp(x + i, 0, img.Width - 1), 0] * mask[0, i + half]);
+                    temp.Data[y, x, 0] = s;
+                }
+
+            for (int y = 0; y < img.Height; y++)
+                for (int x = 0; x < img.Width; x++)
+                {
+                    float s = 0;
+                    for (int i = -half; i <= half; i++)
+                        s += (float)(temp.Data[Utils.Clamp(y + i, 0, img.Height - 1), x, 0] * mask[0, i + half]);
+                    res.Data[y, x, 0] = s;
+                }
+            return res;
+        }
+    }
+
     public static class GeometricTransforms
     {
         private static double LinearInterpolation(double x_fractional, double f0, double f1)

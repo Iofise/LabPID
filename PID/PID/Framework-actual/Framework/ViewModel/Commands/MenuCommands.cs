@@ -1065,7 +1065,6 @@ namespace Framework.ViewModel
         }
         #endregion
 
-
         #region Geometric transforms
         private List<double> ShowScaleDialog()
         {
@@ -1227,6 +1226,46 @@ namespace Framework.ViewModel
             }
 
             ClearProcessedCanvas(canvases[1] as Canvas);
+        }
+        #endregion
+
+        #region Segmentation - Harris Corner Detection
+        private ICommand _harrisCornerCommand;
+        public ICommand HarrisCornerCommand
+        {
+            get { if (_harrisCornerCommand == null) _harrisCornerCommand = new RelayCommand(HarrisCornerDetection); return _harrisCornerCommand; }
+        }
+
+        private void HarrisCornerDetection(object parameter)
+        {
+            if (GrayInitialImage == null) { MessageBox.Show("Vă rugăm să încărcați o imagine grayscale!"); return; }
+
+            List<string> labels = new List<string>() { "Sigma (G_sigma): ", "Alpha (0.04-0.06): ", "Prag T: " };
+            DialogWindow window = new DialogWindow(_mainVM, labels);
+            window.ShowDialog();
+            List<double> values = window.GetValues();
+
+            if (values == null || values.Count < 3) return;
+
+            ClearProcessedCanvas(parameter as Canvas);
+            GrayProcessedImage = GrayInitialImage.Copy();
+            ProcessedImage = Convert(GrayProcessedImage);
+
+            List<System.Drawing.Point> corners = Segmentation.HarrisCornerDetector(GrayInitialImage, values[0], values[1], values[2]);
+
+            Canvas canvas = parameter as Canvas;
+            foreach (System.Drawing.Point p in corners)
+            {
+                System.Windows.Shapes.Ellipse dot = new System.Windows.Shapes.Ellipse()
+                {
+                    Width = 4,
+                    Height = 4,
+                    Fill = System.Windows.Media.Brushes.Red
+                };
+                Canvas.SetLeft(dot, p.X * ScaleValue - 2);
+                Canvas.SetTop(dot, p.Y * ScaleValue - 2);
+                canvas.Children.Add(dot);
+            }
         }
         #endregion
     }

@@ -295,9 +295,13 @@
             </MenuItem>
 
             <MenuItem Header="Segmentation"
-                      Background="{Binding Path=Theme.MenuItemBackgroundColor}"
-                      Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
+                 Background="{Binding Path=Theme.MenuItemBackgroundColor}"
+                Foreground="{Binding Path=Theme.MenuItemForegroundColor}">
 
+            <MenuItem Header="Harris Corner Detection"
+              Foreground="#1E1E1E"
+              Command="{Binding Path=MenuCommands.HarrisCornerCommand}"
+              CommandParameter="{Binding ElementName=processedImageCanvas}"/>
             </MenuItem>
 
             <MenuItem Header="Use processed image as initial image" 
